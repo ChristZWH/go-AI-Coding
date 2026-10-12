@@ -187,8 +187,16 @@ client 容器在 server 变为 `healthy` 之后才启动。
 ## 测试
 
 ```bash
-go test ./...        # 单元 + 接口测试（含 20 条示例数据的完整断言）
+go test ./...                 # 全部测试（默认只显示各包 ok/FAIL 汇总）
+go test -v -count=1 ./...     # 查看每个用例明细（-count=1 禁用结果缓存强制重跑）
 ```
+
+测试覆盖：
+
+- **引擎测试**（`internal/engine`）：20 条示例数据逐条断言（协议/产品/版本/os_hint/置信度）；
+  unknown 兜底与不崩保证；literal `\xNN` 转义归一化；端口弱信号；外部规则文件覆盖（解耦验证）
+- **接口测试**（`internal/httpserver`）：批量识别、输出与输入等长同序不变量、
+  坏 JSON/空数组/脏 banner 容错、健康检查、方法限制
 
 ## 目录结构
 
