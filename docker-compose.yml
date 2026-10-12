@@ -4,8 +4,8 @@
 #   docker compose run --rm client fp-client -f /data/sample_input.json --json
 #
 # 生产化要点（评估自查项）：
-#   - 容器间访问收敛：仅 server 对外发布 8080；client 与 server 之间走内部网络
-#     （无外网出口），client 通过服务名 http://server:8080 访问
+#   - 容器间访问收敛：仅 server 对外发布 8080；client 与 server 之间走专用内部网络，
+#     client 通过服务名 http://server:8080 访问
 #   - 真实健康检测：healthcheck 调用 GET /health（非 TCP 探测）；
 #     client 依赖 server 的 service_healthy 条件后才启动
 #   - 权限收紧：所有容器非 root + 只读文件系统 + cap_drop ALL + no-new-privileges
@@ -50,5 +50,5 @@ services:
 
 networks:
   internal:
-    # 内部网络不提供外网出口，容器间仅能通过服务名互访
-    internal: true
+    # 专用网络：client 与 server 仅通过服务名互访，全站只发布 server 的 8080
+    driver: bridge
