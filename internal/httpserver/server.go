@@ -85,7 +85,10 @@ func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		next.ServeHTTP(w, r)
-		log.Printf("[server] %s %s (%s)", r.Method, r.URL.Path, time.Since(start))
+		// 健康检查由 Compose 每 2 秒轮询一次，跳过日志避免刷屏
+		if r.URL.Path != "/health" {
+			log.Printf("[server] %s %s (%s)", r.Method, r.URL.Path, time.Since(start))
+		}
 	})
 }
 

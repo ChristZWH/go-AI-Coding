@@ -12,10 +12,13 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/ChristZWH/go-AI-Coding/internal/engine"
@@ -34,10 +37,25 @@ func main() {
 		WriteTimeout:      30 * time.Second,
 		IdleTimeout:       60 * time.Second,
 	}
+
+	// 优雅停机：收到 SIGINT/SIGTERM（Ctrl+C / docker compose stop）时，
+	// 停止接收新请求、等待在途请求完成（最多 10s）后干净退出，
+	// 避免 compose 强制 kill 造成的异常退出噪音。
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	go func() {
+		<-ctx.Done()
+		log.Printf("[server] shutting down gracefully ...")
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		_ = srv.Shutdown(shutdownCtx)
+	}()
+
 	log.Printf("[server] listening on %s", addr)
 	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatalf("[server] exit: %v", err)
 	}
+	log.Printf("[server] stopped")
 }
 
 // loadEngine 按优先级加载规则：FP_RULES_FILE 外部规则 > 内嵌默认规则。

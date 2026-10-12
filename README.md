@@ -181,6 +181,7 @@ client 容器在 server 变为 `healthy` 之后才启动。
   `cap_drop: [ALL]` 丢弃全部能力；`no-new-privileges: true`
 - **访问收敛**：client 与 server 之间仅通过专用内部网络以服务名互访；仅 server 对外发布 8080
 - **真实健康检测**：healthcheck 调 `GET /health`；client `depends_on: service_healthy`
+- **优雅停机**：server 响应 SIGINT/SIGTERM 优雅关闭（在途请求完成后再退出），healthcheck 轮询不刷日志
 - **规则解耦**：见上节，规则文件可挂载覆盖
 
 ## 测试
