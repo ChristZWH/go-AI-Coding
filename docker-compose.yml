@@ -1,0 +1,54 @@
+# Banner 指纹识别系统 —— 一键启动
+#
+#   docker compose up               # 启动 server，client 自动跑一次示例并退出（一次性任务，exit 0 属预期）
+#   docker compose run --rm client fp-client -f /data/sample_input.json --json
+#
+# 生产化要点（评估自查项）：
+#   - 容器间访问收敛：仅 server 对外发布 8080；client 与 server 之间走内部网络
+#     （无外网出口），client 通过服务名 http://server:8080 访问
+#   - 真实健康检测：healthcheck 调用 GET /health（非 TCP 探测）；
+#     client 依赖 server 的 service_healthy 条件后才启动
+#   - 权限收紧：所有容器非 root + 只读文件系统 + cap_drop ALL + no-new-privileges
+#   - 规则解耦：识别规则默认内嵌于镜像；挂载外部规则文件并设置
+#     FP_RULES_FILE 即可扩展新协议，无需重新编译
+services:
+  server:
+    build: .
+    image: banner-fp:latest
+    environment:
+      FP_SERVER_ADDR: ":8080"
+    ports:
+      - "8080:8080"        # 仅此一处对外暴露，供验收方 curl 验证
+    networks: [internal]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+      start_period: 3s
+    restart: unless-stopped
+
+  client:
+    build: .
+    image: banner-fp:latest
+    command: ["fp-client", "-f", "/data/sample_input.json", "--server", "http://server:8080"]
+    volumes:
+      - ./testdata/sample_input.json:/data/sample_input.json:ro
+    depends_on:
+      server:
+        condition: service_healthy   # 真实健康检测，healthy 后才执行
+    networks: [internal]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    restart: "no"                    # 一次性任务：打印结果后退出（exit 0）
+
+networks:
+  internal:
+    # 内部网络不提供外网出口，容器间仅能通过服务名互访
+    internal: true

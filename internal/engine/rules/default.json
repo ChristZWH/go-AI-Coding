@@ -1,0 +1,130 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "name": "ssh",
+      "protocol": "SSH",
+      "pattern": "^SSH-[\\d.]+-([^\\s_]+)(?:_([^\\s]+))?(?:[\\s-]+(\\S+))?",
+      "case_insensitive": true,
+      "port_hint": [22],
+      "product": {"group": 1},
+      "version": {"group": 2},
+      "os_hint": {"group": 3, "strip_suffix": "-[0-9]+"},
+      "confidence": 0.95
+    },
+    {
+      "name": "http-server-header",
+      "protocol": "HTTP",
+      "pattern": "(?si)^HTTP/1\\.[01]\\s+\\d{3}.*?Server:\\s*([^/\\s()]+)/([^\\s()]+)(?:\\s*\\(([^)]+)\\))?",
+      "port_hint": [80, 443, 8080, 8443],
+      "product": {"group": 1},
+      "version": {"group": 2},
+      "os_hint": {"group": 3},
+      "confidence": 0.9
+    },
+    {
+      "name": "http-server-bare",
+      "protocol": "HTTP",
+      "pattern": "(?si)^HTTP/1\\.[01]\\s+\\d{3}.*?Server:\\s*([^/\\s()]+)(?:/|\\s|\\z)",
+      "product": {"group": 1},
+      "confidence": 0.8
+    },
+    {
+      "name": "http-no-server",
+      "protocol": "HTTP",
+      "pattern": "^HTTP/1\\.[01]\\s+\\d{3}",
+      "confidence": 0.6
+    },
+    {
+      "name": "mariadb-greeting",
+      "protocol": "MySQL",
+      "pattern": "\\x0a(?:5\\.5\\.5-)?([0-9][^\\x00]{0,63})-MariaDB\\x00",
+      "product": {"static": "MariaDB"},
+      "version": {"group": 1},
+      "confidence": 0.9
+    },
+    {
+      "name": "mysql-greeting",
+      "protocol": "MySQL",
+      "pattern": "\\x0a([0-9][^\\x00]{0,63})\\x00",
+      "port_hint": [3306],
+      "product": {"static": "MySQL"},
+      "version": {"group": 1},
+      "confidence": 0.9
+    },
+    {
+      "name": "tls-handshake",
+      "protocol": "TLS",
+      "pattern": "^\\x16\\x03[\\x00-\\x04]",
+      "confidence": 0.7
+    },
+    {
+      "name": "redis-resp",
+      "protocol": "Redis",
+      "pattern": "^[-+](?:ERR|NOAUTH|PONG|OK)(?:\\s|\\z)",
+      "port_hint": [6379],
+      "product": {"static": "Redis"},
+      "confidence": 0.7
+    },
+    {
+      "name": "ftp-proftpd",
+      "protocol": "FTP",
+      "pattern": "^220[\\s-].*?ProFTPD(?:\\s+([0-9][0-9A-Za-z._-]*))?",
+      "port_hint": [21],
+      "product": {"static": "ProFTPD"},
+      "version": {"group": 1},
+      "confidence": 0.9
+    },
+    {
+      "name": "ftp-vsftpd",
+      "protocol": "FTP",
+      "pattern": "^220[\\s-].*?\\(vsFTPd(?:\\s+([0-9][0-9A-Za-z._-]*))?\\)",
+      "product": {"static": "vsFTPd"},
+      "version": {"group": 1},
+      "confidence": 0.9
+    },
+    {
+      "name": "ftp-pureftpd",
+      "protocol": "FTP",
+      "pattern": "^220[\\s-].*?Pure-FTPd",
+      "product": {"static": "Pure-FTPd"},
+      "confidence": 0.85
+    },
+    {
+      "name": "ftp-generic",
+      "protocol": "FTP",
+      "pattern": "^220[\\s-]",
+      "confidence": 0.6
+    },
+    {
+      "name": "port-ssh",
+      "protocol": "SSH",
+      "port_hint": [22],
+      "confidence": 0.5
+    },
+    {
+      "name": "port-http",
+      "protocol": "HTTP",
+      "port_hint": [80, 443, 8080, 8443],
+      "confidence": 0.5
+    },
+    {
+      "name": "port-mysql",
+      "protocol": "MySQL",
+      "port_hint": [3306],
+      "confidence": 0.5
+    },
+    {
+      "name": "port-redis",
+      "protocol": "Redis",
+      "port_hint": [6379],
+      "confidence": 0.5
+    },
+    {
+      "name": "port-ftp",
+      "protocol": "FTP",
+      "port_hint": [21],
+      "confidence": 0.5
+    }
+  ]
+}

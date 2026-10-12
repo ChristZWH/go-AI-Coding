@@ -1,0 +1,40 @@
+# === Go 构建产物 ===
+# 编译输出统一放 bin/，本机 go build 产生的 exe 不入库
+bin/
+dist/
+*.exe
+*.exe~
+*.test
+*.out
+coverage.*
+
+# === Go 依赖 ===
+# 本项目使用 go mod：go.mod 与 go.sum 都必须提交，切勿忽略 go.sum
+# 若启用 vendor 模式，vendor/ 目录可忽略（本项目默认不启用）
+vendor/
+
+# === 环境变量 / 密钥 ===
+.env
+.env.*
+!.env.example
+
+# === IDE / 编辑器 ===
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# === 操作系统 ===
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# === 日志与运行时产物 ===
+*.log
+logs/
+
+# === 任务过程文档（仅本地参考，不入库） ===
+que.md
+todo.md
+problem.md
